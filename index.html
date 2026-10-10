@@ -3,21 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>FocusTube</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans">
 
-  <!-- Навигация -->
+  <!-- Шапка -->
   <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur px-4 py-3 sticky top-0 z-40 flex items-center justify-between">
     <div class="flex items-center space-x-2">
       <div class="w-3 h-3 bg-indigo-500 rounded-full"></div>
       <h1 class="font-bold text-base md:text-lg">FocusTube</h1>
     </div>
     <nav class="flex space-x-2 text-xs md:text-sm">
-      <button onclick="setTab('player')" id="btn-player" class="px-3 py-1.5 rounded-lg bg-indigo-600">Плеер</button>
-      <button onclick="setTab('playlists')" id="btn-playlists" class="px-3 py-1.5 rounded-lg bg-slate-800">Плейлисты</button>
-      <button onclick="setTab('notes')" id="btn-notes" class="px-3 py-1.5 rounded-lg bg-slate-800">Заметки</button>
+      <button onclick="setTab('player')" id="btn-player" class="px-3 py-1.5 rounded-lg bg-indigo-600 transition">Плеер</button>
+      <button onclick="setTab('playlists')" id="btn-playlists" class="px-3 py-1.5 rounded-lg bg-slate-800 transition">Плейлисты</button>
+      <button onclick="setTab('notes')" id="btn-notes" class="px-3 py-1.5 rounded-lg bg-slate-800 transition">Заметки</button>
     </nav>
   </header>
 
@@ -32,54 +33,65 @@
       <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
           <h2 id="video-title" class="font-bold text-base md:text-lg text-slate-100">Загрузка плейлиста...</h2>
-          <p id="video-meta" class="text-xs text-slate-400">Управляйте процессом без рекомендаций</p>
+          <p id="video-meta" class="text-xs text-slate-400">Режим фокуса: только ваш выбранный плейлист</p>
         </div>
         <div class="flex space-x-2">
-          <button onclick="prevVideo()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg">⏮ Предыдущее</button>
-          <button onclick="openNoteModal()" class="px-3 py-2 bg-indigo-600/80 hover:bg-indigo-600 text-xs rounded-lg">✍️ Заметка</button>
-          <button onclick="nextVideo()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg">Следующее ⏭</button>
+          <button onclick="prevVideo()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg transition">⏮ Пред.</button>
+          <button onclick="openNoteModal()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-500 text-xs rounded-lg font-medium transition">✍️ Заметка</button>
+          <button onclick="nextVideo()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-xs rounded-lg transition">След. ⏭</button>
         </div>
       </div>
     </section>
 
     <!-- Экран 2: Управление плейлистами -->
     <section id="view-playlists" class="hidden max-w-xl mx-auto space-y-4">
-      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
-        <h3 class="font-bold text-sm">Добавить YouTube плейлист</h3>
-        <p class="text-xs text-slate-400">Вставьте полную ссылку на открытый плейлист или его ID (начинается на PL...).</p>
-        <input id="input-pl-name" type="text" placeholder="Название (например: Курс по JavaScript)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs focus:outline-none focus:border-indigo-500">
-        <input id="input-pl-url" type="text" placeholder="Ссылка на плейлист (https://...list=PL...)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs focus:outline-none focus:border-indigo-500">
-        <button onclick="savePlaylist()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-semibold">Добавить в список</button>
+      <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-3">
+        <h3 class="font-bold text-sm">Добавить плейлист</h3>
+        <p class="text-xs text-slate-400">Поддерживаются как открытые, так и плейлисты <b>с доступом по ссылке</b> (Unlisted).</p>
+        
+        <input id="input-pl-name" type="text" placeholder="Название (например: Курс по React)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs focus:outline-none focus:border-indigo-500">
+        <input id="input-pl-url" type="text" placeholder="Ссылка (https://...list=PL...)" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs focus:outline-none focus:border-indigo-500">
+        <button onclick="savePlaylist()" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-xs font-semibold transition">Сохранить плейлист</button>
       </div>
 
-      <div id="saved-playlists" class="space-y-2">
-        <!-- Список плейлистов -->
+      <div class="space-y-2">
+        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider px-1">Ваши плейлисты</h4>
+        <div id="saved-playlists" class="space-y-2"></div>
       </div>
     </section>
 
-    <!-- Экран 3: Заметки -->
+    <!-- Экран 3: Заметки с выборочным экспортом -->
     <section id="view-notes" class="hidden space-y-4">
-      <div class="flex justify-between items-center">
-        <h3 class="font-bold text-base">Сохраненные выводы</h3>
-        <button onclick="exportMarkdown()" class="text-xs bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 hover:bg-slate-700">Скачать в .md</button>
+      <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-wrap gap-2 items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <input type="checkbox" id="select-all-checkbox" onchange="toggleSelectAll(this.checked)" class="w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-0 bg-slate-950 cursor-pointer">
+          <label for="select-all-checkbox" class="text-xs font-medium cursor-pointer">Выбрать все</label>
+          <span id="selected-counter" class="text-xs text-slate-400 ml-2">(выбрано: 0)</span>
+        </div>
+
+        <div class="flex space-x-2">
+          <button onclick="deleteSelectedNotes()" class="text-xs bg-red-950/40 border border-red-800/60 hover:bg-red-900/40 text-red-300 px-3 py-1.5 rounded-lg transition">Удалить выбранные</button>
+          <button onclick="exportSelectedMarkdown()" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium px-4 py-1.5 rounded-lg transition shadow-lg">📁 Экспорт в .MD</button>
+        </div>
       </div>
+
       <div id="notes-container" class="grid gap-3 md:grid-cols-2"></div>
     </section>
 
   </main>
 
-  <!-- Модалка для заметки (после завершения видео) -->
+  <!-- Модальное окно: Заметка после видео -->
   <div id="note-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
       <div>
         <span class="text-[11px] font-bold uppercase tracking-wider text-indigo-400">Видео подошло к концу</span>
         <h4 id="modal-video-name" class="font-bold text-sm mt-1 text-slate-100"></h4>
       </div>
-      <p class="text-xs text-slate-400">Что главного вы вынесли из этого урока? Зафиксируйте мысль перед следующим роликом.</p>
-      <textarea id="modal-note-body" rows="4" placeholder="Ваша заметка..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs focus:outline-none focus:border-indigo-500"></textarea>
+      <p class="text-xs text-slate-400">Сделайте паузу. Зафиксируйте главные инсайты перед переходом к следующему видео:</p>
+      <textarea id="modal-note-body" rows="4" placeholder="Главные мысли, выводы, таймкоды..." class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs focus:outline-none focus:border-indigo-500 text-slate-100"></textarea>
       <div class="flex justify-end space-x-2">
-        <button onclick="closeModalAndPlayNext(false)" class="px-3 py-2 text-xs text-slate-400 hover:text-white">Пропустить</button>
-        <button onclick="closeModalAndPlayNext(true)" class="px-4 py-2 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium">Сохранить и дальше ➔</button>
+        <button onclick="closeModalAndPlayNext(false)" class="px-3 py-2 text-xs text-slate-400 hover:text-white transition">Пропустить</button>
+        <button onclick="closeModalAndPlayNext(true)" class="px-4 py-2 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition">Сохранить и дальше ➔</button>
       </div>
     </div>
   </div>
@@ -88,35 +100,32 @@
   <script>
     let player;
     let isApiReady = false;
-    let currentPlaylistId = "PLDyQo7g0_ed7kOz_H_0F_8kE1Q1V0j_QY"; // Дефолтный ID плейлиста для теста
+    let selectedNoteIds = new Set();
 
-    // Инициализация плеера YouTube
+    // Загрузка сохраненного плейлиста или дефолтный (официальный плейлист YouTube)
+    let currentPlaylistId = localStorage.getItem('last_active_playlist') || "PLBCF2DAC6EDB574FD";
+
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('yt-iframe', {
         playerVars: {
           listType: 'playlist',
           list: currentPlaylistId,
           rel: 0,
-          autoplay: 0
+          autoplay: 0,
+          origin: window.location.origin
         },
         events: {
-          'onReady': onPlayerReady,
+          'onReady': () => updateVideoDetails(),
           'onStateChange': onPlayerStateChange
         }
       });
       isApiReady = true;
     }
 
-    function onPlayerReady() {
-      updateVideoDetails();
-    }
-
-    // Отслеживание конца видео
     function onPlayerStateChange(event) {
       if (event.data === YT.PlayerState.PLAYING) {
         updateVideoDetails();
       }
-      // YT.PlayerState.ENDED = 0 (Видео завершилось)
       if (event.data === YT.PlayerState.ENDED) {
         openNoteModal();
       }
@@ -124,8 +133,9 @@
 
     function updateVideoDetails() {
       setTimeout(() => {
+        if (!player || !player.getVideoData) return;
         const data = player.getVideoData();
-        const durationSec = Math.round(player.getDuration());
+        const durationSec = Math.round(player.getDuration() || 0);
         const mins = Math.floor(durationSec / 60);
         const secs = durationSec % 60;
         const durStr = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
@@ -134,11 +144,11 @@
           document.getElementById('video-title').textContent = data.title;
           document.getElementById('video-meta').textContent = `Длительность: ${durStr} | Автор: ${data.author || 'YouTube'}`;
         }
-      }, 500);
+      }, 600);
     }
 
-    function nextVideo() { player.nextVideo(); }
-    function prevVideo() { player.previousVideo(); }
+    function nextVideo() { if (player) player.nextVideo(); }
+    function prevVideo() { if (player) player.previousVideo(); }
 
     function openNoteModal() {
       const data = player.getVideoData();
@@ -151,13 +161,14 @@
       if (shouldSave) {
         const text = document.getElementById('modal-note-body').value.trim();
         const data = player.getVideoData();
-        const durationSec = Math.round(player.getDuration());
+        const durationSec = Math.round(player.getDuration() || 0);
         const mins = Math.floor(durationSec / 60);
         const secs = durationSec % 60;
 
         if (text) {
           const notes = JSON.parse(localStorage.getItem('focus_notes') || '[]');
           notes.unshift({
+            id: 'note_' + Date.now(),
             title: data.title || "Видео",
             url: `https://www.youtube.com/watch?v=${data.video_id}`,
             duration: `${mins}:${secs < 10 ? '0' : ''}${secs}`,
@@ -172,10 +183,14 @@
       player.nextVideo();
     }
 
-    // Управление плейлистами
+    // Умный парсер ссылок (поддерживает обычные ссылки, unlisted и чистые ID)
     function extractPlaylistId(url) {
-      const match = url.match(/[?&]list=([^#\&\?]+)/);
-      return match ? match[1] : url.trim();
+      const trimmed = url.trim();
+      const match = trimmed.match(/[?&]list=([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        return match[1];
+      }
+      return trimmed;
     }
 
     function savePlaylist() {
@@ -183,7 +198,7 @@
       const rawUrl = document.getElementById('input-pl-url').value.trim();
       const plId = extractPlaylistId(rawUrl);
 
-      if (!name || !plId) return alert('Заполните название и корректную ссылку на плейлист!');
+      if (!name || !plId) return alert('Введите название и корректную ссылку/ID плейлиста!');
 
       const playlists = JSON.parse(localStorage.getItem('focus_playlists') || '[]');
       playlists.push({ id: plId, name: name });
@@ -196,62 +211,131 @@
 
     function loadPlaylistById(id) {
       currentPlaylistId = id;
+      localStorage.setItem('last_active_playlist', id);
       if (player && player.loadPlaylist) {
         player.loadPlaylist({ list: id, listType: 'playlist' });
         setTab('player');
       }
     }
 
+    function deletePlaylist(index) {
+      const playlists = JSON.parse(localStorage.getItem('focus_playlists') || '[]');
+      playlists.splice(index, 1);
+      localStorage.setItem('focus_playlists', JSON.stringify(playlists));
+      renderPlaylists();
+    }
+
     function renderPlaylists() {
       const list = JSON.parse(localStorage.getItem('focus_playlists') || '[]');
       const container = document.getElementById('saved-playlists');
       if (list.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500">Плейлисты пока не добавлены.</p>`;
+        container.innerHTML = `<p class="text-xs text-slate-500">Плейлисты еще не добавлены.</p>`;
         return;
       }
       container.innerHTML = list.map((pl, idx) => `
         <div class="bg-slate-900 border border-slate-800 p-3 rounded-lg flex items-center justify-between">
-          <div>
-            <h4 class="font-semibold text-xs text-slate-200">${pl.name}</h4>
+          <div class="truncate mr-2">
+            <h4 class="font-semibold text-xs text-slate-200 truncate">${pl.name}</h4>
             <span class="text-[10px] text-slate-500">ID: ${pl.id}</span>
           </div>
-          <button onclick="loadPlaylistById('${pl.id}')" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-xs rounded">Включить</button>
+          <div class="flex space-x-2 shrink-0">
+            <button onclick="loadPlaylistById('${pl.id}')" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-xs rounded transition">Включить</button>
+            <button onclick="deletePlaylist(${idx})" class="px-2 py-1 bg-slate-800 hover:bg-red-900 text-slate-400 hover:text-red-200 text-xs rounded transition">✕</button>
+          </div>
         </div>
       `).join('');
+    }
+
+    // Управление заметками и экспорт
+    function toggleNoteSelection(id) {
+      if (selectedNoteIds.has(id)) {
+        selectedNoteIds.delete(id);
+      } else {
+        selectedNoteIds.add(id);
+      }
+      updateSelectionCounter();
+    }
+
+    function toggleSelectAll(selectAll) {
+      const notes = JSON.parse(localStorage.getItem('focus_notes') || '[]');
+      selectedNoteIds.clear();
+      if (selectAll) {
+        notes.forEach(n => selectedNoteIds.add(n.id));
+      }
+      updateSelectionCounter();
+      renderNotes();
+    }
+
+    function updateSelectionCounter() {
+      document.getElementById('selected-counter').textContent = `(выбрано: ${selectedNoteIds.size})`;
     }
 
     function renderNotes() {
       const notes = JSON.parse(localStorage.getItem('focus_notes') || '[]');
       const container = document.getElementById('notes-container');
+      
       if (notes.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500 col-span-2">Здесь будут отображаться ваши заметки.</p>`;
+        container.innerHTML = `<p class="text-xs text-slate-500 col-span-2 py-6 text-center">Заметок пока нет. Посмотрите ролик, и приложение предложит оставить мысли.</p>`;
+        updateSelectionCounter();
         return;
       }
-      container.innerHTML = notes.map(n => `
-        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-col justify-between">
-          <div>
-            <div class="flex justify-between text-[10px] text-slate-500 mb-1">
-              <span>⏱ ${n.duration}</span>
-              <span>${n.date}</span>
+
+      container.innerHTML = notes.map(n => {
+        const isChecked = selectedNoteIds.has(n.id);
+        return `
+          <div class="bg-slate-900 border ${isChecked ? 'border-indigo-600/80 bg-slate-900/90' : 'border-slate-800'} p-4 rounded-xl flex flex-col justify-between transition">
+            <div>
+              <div class="flex justify-between items-start mb-2">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleNoteSelection('${n.id}')" class="w-4 h-4 rounded border-slate-700 text-indigo-600 focus:ring-0 bg-slate-950 cursor-pointer">
+                <div class="text-[10px] text-slate-500 space-x-2">
+                  <span>⏱ ${n.duration}</span>
+                  <span>${n.date}</span>
+                </div>
+              </div>
+              <a href="${n.url}" target="_blank" class="font-bold text-xs text-indigo-400 hover:underline line-clamp-1 mb-2">${n.title}</a>
+              <p class="text-slate-300 text-xs whitespace-pre-wrap leading-relaxed">${n.text}</p>
             </div>
-            <a href="${n.url}" target="_blank" class="font-bold text-xs text-indigo-400 hover:underline line-clamp-1 mb-2">${n.title}</a>
-            <p class="text-slate-300 text-xs whitespace-pre-wrap">${n.text}</p>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
+
+      updateSelectionCounter();
     }
 
-    function exportMarkdown() {
+    function deleteSelectedNotes() {
+      if (selectedNoteIds.size === 0) return alert('Выберите хотя бы одну заметку для удаления!');
+      if (!confirm(`Удалить выбранные заметки (${selectedNoteIds.size} шт.)?`)) return;
+
+      let notes = JSON.parse(localStorage.getItem('focus_notes') || '[]');
+      notes = notes.filter(n => !selectedNoteIds.has(n.id));
+      localStorage.setItem('focus_notes', JSON.stringify(notes));
+      selectedNoteIds.clear();
+      renderNotes();
+    }
+
+    // Экспорт выбранных заметок в файл .md
+    function exportSelectedMarkdown() {
       const notes = JSON.parse(localStorage.getItem('focus_notes') || '[]');
-      let md = "# Заметки по видео\n\n";
-      notes.forEach(n => {
-        md += `### [${n.title}](${n.url})\n- **Длительность:** ${n.duration}\n- **Дата:** ${n.date}\n\n${n.text}\n\n---\n\n`;
+      const targetNotes = notes.filter(n => selectedNoteIds.has(n.id));
+
+      if (targetNotes.length === 0) {
+        return alert('Отметьте галочками заметки, которые вы хотите экспортировать!');
+      }
+
+      let md = `# Заметки по курсам (FocusTube)\nДата выгрузки: ${new Date().toLocaleDateString()}\n\n---\n\n`;
+      targetNotes.forEach(n => {
+        md += `### [${n.title}](${n.url})\n`;
+        md += `- **Длительность:** ${n.duration}\n`;
+        md += `- **Дата:** ${n.date}\n\n`;
+        md += `> ${n.text.replace(/\n/g, '\n> ')}\n\n---\n\n`;
       });
-      const blob = new Blob([md], { type: 'text/markdown' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'youtube-notes.md';
-      a.click();
+
+      const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `notes-${new Date().toISOString().slice(0, 10)}.md`;
+      link.click();
+      URL.revokeObjectURL(link.href);
     }
 
     function setTab(tab) {
